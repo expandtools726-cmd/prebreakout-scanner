@@ -18,41 +18,95 @@
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow-wrap: break-word; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
   h1 { font-size: 22px; margin: 0 0 2px; letter-spacing: -0.01em; }
-  .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
   .banner { background: var(--warn-bg); color: var(--warn-ink); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13.5px; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
-  .stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  button, input, select { font: inherit; color: inherit; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 0; }
+  .stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.2; }
   .stat span { color: var(--muted); font-size: 12.5px; }
+
   .filters { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: grid; gap: 12px; }
-  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
-  input[type=search] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 240px; font: inherit; }
-  label.rng { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
-  label.rng output { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 28px; }
-  input[type=range] { accent-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+  .field { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  #q { flex: 1 1 200px; }
+  label.rng { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; flex: 1 1 230px; min-width: 0; }
+  label.rng input { flex: 1; min-width: 0; accent-color: var(--accent); }
+  label.rng output { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 2.2em; text-align: right; }
+  .sortbox { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip { border: 1px solid var(--line); background: var(--chip-bg); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
   .chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  .tablewrap { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; min-width: 860px; }
-  th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  th:first-child, td:first-child { text-align: left; }
-  th.l, td.l { text-align: left; }
-  th { font-size: 12px; color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--card); }
+  .chip:disabled { opacity: .6; cursor: default; }
+
+  /* ---------- Table (desktop): scroll nahi, width mein fit ---------- */
+  .tablewrap { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; font-size: 14px; white-space: nowrap; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; user-select: none; }
+  th[data-key] { cursor: pointer; }
   th.sorted { color: var(--accent); }
-  tr:last-child td { border-bottom: 0; }
+  th.sorted::after { content: attr(data-arrow); }
+  th:first-child, td:first-child { padding-left: 14px; }
+  th:last-child, td:last-child { padding-right: 14px; }
+  th.c-stock, td.c-stock, th.c-setups, td.c-setups { text-align: left; }
+  td.c-setups { white-space: normal; }
+  tbody tr:last-child td { border-bottom: 0; }
   tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 40%, transparent); }
   a.sym { color: var(--ink); font-weight: 700; text-decoration: none; border-bottom: 1px dashed var(--muted); }
   .up { color: var(--up); } .down { color: var(--down); }
-  .score { display: inline-flex; align-items: center; gap: 8px; }
-  .bar { width: 54px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .score { display: inline-flex; align-items: center; gap: 6px; }
+  .bar { width: 40px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--accent); }
-  .tag { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); margin-right: 4px; }
-  svg.spark { width: 90px; height: 28px; display: block; margin-left: auto; }
-  .empty { padding: 30px; text-align: center; color: var(--muted); }
+  .tag { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); margin: 1px 4px 1px 0; white-space: nowrap; }
+  .tag.exch { background: var(--accent-soft); color: var(--accent); margin: 0 0 0 6px; }
+  svg.spark { width: 84px; height: 28px; display: block; margin-left: auto; }
+  .empty { padding: 30px 16px; text-align: center; color: var(--muted); }
+  .more { display: block; margin: 14px auto 0; padding: 10px 22px; border: 1px solid var(--line); background: var(--card); border-radius: 999px; cursor: pointer; font-size: 14px; }
+  .more:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Kam zaroori columns chhote screen par apne aap hat jate hain */
+  @media (max-width: 1100px) { .c-bb { display: none; } }
+  @media (max-width: 960px)  { .c-spark { display: none; } }
+  @media (max-width: 900px)  { .c-stop, .c-vol { display: none; } }
+  @media (max-width: 800px)  { .c-d5 { display: none; } }
+
+  /* ---------- Mobile: har stock ek card ---------- */
+  @media (max-width: 719px) {
+    .wrap { padding: 14px 12px 40px; }
+    h1 { font-size: 20px; }
+    table, tbody { display: block; }
+    thead { display: none; }
+    tbody tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    tbody tr:last-child { border-bottom: 0; }
+    td, td:first-child, td:last-child { display: block; padding: 0; border: 0; text-align: left; white-space: normal; min-width: 0; font-size: 14px; }
+    td::before { content: attr(data-label); display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+    td.c-stock::before, td.c-score::before, td.c-setups::before { display: none; }
+    td.c-stock  { order: 1; grid-column: span 2; font-size: 16px; }
+    td.c-score  { order: 2; grid-column: span 2; text-align: right; }
+    td.c-score .score { justify-content: flex-end; }
+    td.c-price  { order: 3; }
+    td.c-d1     { order: 4; }
+    td.c-d5     { order: 5; display: block; }
+    td.c-spark  { order: 6; display: block; }
+    td.c-setups { order: 7; grid-column: 1 / -1; }
+    td.c-brk    { order: 8; }
+    td.c-level  { order: 9; }
+    td.c-stop   { order: 10; display: block; }
+    td.c-vol    { order: 11; display: block; }
+    td.c-bb     { display: none; }
+    svg.spark { width: 100%; max-width: 80px; margin-left: 0; }
+  }
+  @media (max-width: 380px) {
+    tbody tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    td.c-stock, td.c-score { grid-column: span 1; }
+  }
+
   details { margin-top: 18px; color: var(--muted); font-size: 13.5px; }
   details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
   details li { margin: 4px 0; }
@@ -65,10 +119,10 @@
   <div class="sub" id="meta">Loading...</div>
   <div class="row" style="margin-bottom:14px" id="refreshRow" hidden>
     <button type="button" class="chip" id="refreshBtn">Data refresh karo</button>
-    <label class="rng"><input type="checkbox" id="onlyNse"> sirf NSE</label>
+    <label class="sortbox"><input type="checkbox" id="onlyNse"> sirf NSE</label>
     <span class="sub" id="refreshMsg" role="status" style="margin:0"></span>
   </div>
-  <div id="demo" class="banner" hidden>Ye <b>demo (nakli) data</b> hai, sirf dashboard dekhne ke liye. Asli data ke liye <code>python scanner.py</code> chalao.</div>
+  <div id="demo" class="banner" hidden>Ye <b>demo (nakli) data</b> hai, sirf dashboard dekhne ke liye. Asli data ke liye <code>python scanner.py --bhavcopy --bse</code> chalao.</div>
 
   <div class="stats">
     <div class="stat"><b id="s-scanned">-</b><span>Stocks scan hue</span></div>
@@ -79,11 +133,27 @@
 
   <div class="filters">
     <div class="row">
-      <input type="search" id="q" placeholder="Symbol dhundo (jaise DHANUKA)" aria-label="Symbol search">
-      <label class="rng">Min score <input type="range" id="minScore" min="0" max="100" step="5" value="40"><output id="minScoreO">40</output></label>
-      <label class="rng">Breakout se max door <input type="range" id="maxDist" min="1" max="10" step="0.5" value="10"><output id="maxDistO">10</output>%</label>
+      <input type="search" id="q" class="field" placeholder="Symbol dhundo (jaise DHANUKA)" aria-label="Symbol search">
+      <label class="rng">Min score <input type="range" id="minScore" min="0" max="100" step="5" value="60"><output id="minScoreO">60</output></label>
+      <label class="rng">Breakout se door <input type="range" id="maxDist" min="1" max="10" step="0.5" value="10"><output id="maxDistO">10</output>%</label>
     </div>
-    <div class="chips" id="chips" role="group" aria-label="Setup filter"></div>
+    <div class="row">
+      <div class="chips" id="chips" role="group" aria-label="Setup filter"></div>
+    </div>
+    <div class="row">
+      <div class="sortbox">Sort:
+        <select id="sortSel" class="field" aria-label="Sort by">
+          <option value="score">Score</option>
+          <option value="to_breakout">Breakout ke paas</option>
+          <option value="vol_ratio">Volume sookha (kam ratio)</option>
+          <option value="chg1d">1D %</option>
+          <option value="chg5d">5D %</option>
+          <option value="close">Price</option>
+          <option value="symbol">Naam (A-Z)</option>
+        </select>
+        <button type="button" class="chip" id="dirBtn" aria-label="Sort ki disha badlo">↓</button>
+      </div>
+    </div>
   </div>
 
   <div class="tablewrap">
@@ -93,6 +163,7 @@
     </table>
     <div class="empty" id="empty" hidden>Is filter par koi stock nahi mila. Min score kam karke dekho.</div>
   </div>
+  <button type="button" class="more" id="more" hidden></button>
 
   <details>
     <summary>Columns ka matlab aur setups</summary>
@@ -101,15 +172,16 @@
       <li><b>Level</b>: pichhle 20 din ka high. Isse upar close = breakout trigger.</li>
       <li><b>Stop</b>: pichhle 20 din ka low (base ka neeche). Sirf reference hai.</li>
       <li><b>Vol ratio</b>: 5-din avg volume / 50-din avg. 0.85 se kam = volume sookh raha hai (dry-up).</li>
-      <li><b>BB pctile</b>: Bollinger width pichhle 120 din mein kitne percentile par. 10 se kam = squeeze.</li>
-      <li><b>Consolidation + Volume dry-up</b>: 20 din ki range 12% se kam aur volume dry-up.</li>
-      <li><b>52W High ke paas</b>: high se 5% ke andar aur 50-DMA ke upar (uptrend).</li>
-      <li><b>Bollinger squeeze</b>: volatility sabse kam 10% mein.</li>
-      <li><b>Beaten-down base</b>: 52W high se 25%+ gira, low se 20% ke andar, ab tight base (Dhanuka jaisa).</li>
+      <li><b>BB %ile</b>: Bollinger width pichhle 120 din mein kitne percentile par. 10 se kam = squeeze.</li>
+      <li><b>Consolidation</b>: 20 din ki range 12% se kam aur volume dry-up.</li>
+      <li><b>52W High</b>: high se 5% ke andar aur 50-DMA ke upar (uptrend).</li>
+      <li><b>Squeeze</b>: Bollinger volatility sabse kam 10% mein.</li>
+      <li><b>Base</b>: 52W high se 25%+ gira, low se 20% ke andar, ab tight base (Dhanuka jaisa).</li>
+      <li>Chhote screen par kam zaroori columns apne aap chhup jate hain. Mobile par har stock card mein dikhta hai.</li>
     </ul>
   </details>
 
-  <p class="foot">Sirf educational screening hai, trade ki salah nahi. Pre-breakout ka matlab ye nahi ki breakout aayega. Stop-loss aur risk apna khud tay karo. Data: Yahoo Finance (daily, end-of-day).</p>
+  <p class="foot" id="foot">Sirf educational screening hai, trade ki salah nahi. Pre-breakout ka matlab ye nahi ki breakout aayega. Stop-loss aur risk apna khud tay karo.</p>
 </div>
 
 <script src="data.js"></script>
@@ -119,33 +191,57 @@
   var $ = function (id) { return document.getElementById(id); };
   if (!D) { $("meta").textContent = "data.js nahi mili. Pehle scanner.py chalao."; return; }
 
+  var PAGE = 50;
   var rows = D.rows || [];
   var labels = D.labels || {};
-  var active = {};           // setup -> true
-  var sortKey = "score", sortDir = -1;
+  var SHORT = { TIGHT: "Consolidation", NEAR_HIGH: "52W High", SQUEEZE: "Squeeze", BASE: "Base" };
+  var ASC_DEFAULT = { symbol: 1, to_breakout: 1, vol_ratio: 1 };
+  var active = {};
+  var sortKey = "score", sortDir = -1, limit = PAGE;
 
   $("meta").textContent = "Update: " + D.generated_at + " | Data tak: " + (D.data_asof || "-") + (D.source ? " | Source: " + D.source : "");
   $("demo").hidden = !D.demo;
   $("s-scanned").textContent = D.scanned;
   $("s-matched").textContent = D.matched;
   $("s-top").textContent = rows.length ? rows[0].score : "-";
+  if (D.source) {
+    $("foot").textContent = "Sirf educational screening hai, trade ki salah nahi. Pre-breakout ka matlab ye nahi ki breakout aayega. " +
+      "Stop-loss aur risk apna khud tay karo. Data: " + D.source + " (daily, end-of-day).";
+  }
 
+  // columns: [key, header, class, sortable, card-label]
   var cols = [
-    ["symbol", "Stock", "l"], ["close", "Price"], ["chg1d", "1D %"], ["chg5d", "5D %"],
-    ["score", "Score"], ["setups", "Setups", "l", true], ["to_breakout", "Breakout tak %"],
-    ["level", "Level"], ["stop", "Stop"], ["vol_ratio", "Vol ratio"], ["bb_pctile", "BB pctile"], ["spark", "60D", "", true]
+    ["symbol", "Stock", "c-stock", true, ""],
+    ["close", "Price", "c-price", true, "Price"],
+    ["chg1d", "1D %", "c-d1", true, "1D"],
+    ["chg5d", "5D %", "c-d5", true, "5D"],
+    ["score", "Score", "c-score", true, ""],
+    ["setups", "Setups", "c-setups", false, ""],
+    ["to_breakout", "Breakout", "c-brk", true, "Breakout tak"],
+    ["level", "Level", "c-level", true, "Level"],
+    ["stop", "Stop", "c-stop", true, "Stop"],
+    ["vol_ratio", "Vol ratio", "c-vol", true, "Vol ratio"],
+    ["bb_pctile", "BB %ile", "c-bb", true, "BB %ile"],
+    ["spark", "60D", "c-spark", false, "60 din"]
   ];
+
+  function setSort(key, dir) {
+    sortKey = key;
+    sortDir = dir !== undefined ? dir : (ASC_DEFAULT[key] ? 1 : -1);
+    limit = PAGE;
+    render();
+  }
+
   var head = $("head");
   cols.forEach(function (c) {
     var th = document.createElement("th");
     th.textContent = c[1];
-    if (c[2] === "l") th.className = "l";
-    if (!c[3]) {
-      th.addEventListener("click", function () {
-        if (sortKey === c[0]) sortDir = -sortDir; else { sortKey = c[0]; sortDir = (c[0] === "symbol" || c[0] === "to_breakout") ? 1 : -1; }
-        render();
-      });
+    th.className = c[2];
+    if (c[3]) {
       th.dataset.key = c[0];
+      th.addEventListener("click", function () {
+        if (sortKey === c[0]) setSort(c[0], -sortDir); else setSort(c[0]);
+      });
     }
     head.appendChild(th);
   });
@@ -157,12 +253,15 @@
     b.addEventListener("click", function () {
       active[k] = !active[k];
       b.setAttribute("aria-pressed", active[k] ? "true" : "false");
-      render();
+      limit = PAGE; render();
     });
     chips.appendChild(b);
   });
 
-  ["q", "minScore", "maxDist"].forEach(function (id) { $(id).addEventListener("input", render); });
+  ["q", "minScore", "maxDist"].forEach(function (id) { $(id).addEventListener("input", function () { limit = PAGE; render(); }); });
+  $("sortSel").addEventListener("change", function () { setSort(this.value); });
+  $("dirBtn").addEventListener("click", function () { setSort(sortKey, -sortDir); });
+  $("more").addEventListener("click", function () { limit += PAGE; render(); });
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -170,12 +269,19 @@
     if (text !== undefined) e.textContent = text;
     return e;
   }
-  function pct(v) { return (v > 0 ? "+" : "") + v.toFixed(2) + "%"; }
+  function num(v, d) { return (typeof v === "number" && isFinite(v)) ? v.toFixed(d) : "-"; }
+  function pct(v) { return (typeof v === "number" && isFinite(v)) ? (v > 0 ? "+" : "") + v.toFixed(2) + "%" : "-"; }
+  function cell(cls, label, text, extra) {
+    var td = el("td", cls + (extra ? " " + extra : ""), text);
+    if (label) td.setAttribute("data-label", label);
+    return td;
+  }
 
   function spark(arr, up) {
     var ns = "http://www.w3.org/2000/svg";
     var svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("class", "spark"); svg.setAttribute("viewBox", "0 0 90 28");
+    svg.setAttribute("class", "spark"); svg.setAttribute("viewBox", "0 0 90 28"); svg.setAttribute("aria-hidden", "true");
+    if (!arr || arr.length < 2) return svg;
     var mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), rg = (mx - mn) || 1;
     var pts = arr.map(function (v, i) {
       return (i / (arr.length - 1) * 90).toFixed(1) + "," + (26 - (v - mn) / rg * 24).toFixed(1);
@@ -194,49 +300,81 @@
     var need = Object.keys(active).filter(function (k) { return active[k]; });
 
     var list = rows.filter(function (r) {
-      if (q && r.symbol.indexOf(q) === -1) return false;
+      if (q && r.symbol.toUpperCase().indexOf(q) === -1) return false;
       if (r.score < minScore || r.to_breakout > maxDist) return false;
       return need.every(function (k) { return r.setups.indexOf(k) !== -1; });
     });
     list.sort(function (a, b) {
       var x = a[sortKey], y = b[sortKey];
       if (typeof x === "string") return x.localeCompare(y) * sortDir;
+      x = (typeof x === "number" && isFinite(x)) ? x : Infinity;
+      y = (typeof y === "number" && isFinite(y)) ? y : Infinity;
       return ((x > y) - (x < y)) * sortDir;
     });
 
     Array.prototype.forEach.call(head.children, function (th) {
-      th.classList.toggle("sorted", th.dataset.key === sortKey);
+      var on = th.dataset.key === sortKey;
+      th.classList.toggle("sorted", on);
+      th.dataset.arrow = on ? (sortDir > 0 ? " ▲" : " ▼") : "";
     });
+    $("sortSel").value = sortKey;
+    $("dirBtn").textContent = sortDir > 0 ? "↑" : "↓";
 
     $("s-shown").textContent = list.length;
     $("empty").hidden = list.length > 0;
+    var shown = list.slice(0, limit);
     var body = $("body"); body.textContent = "";
-    list.forEach(function (r) {
+
+    shown.forEach(function (r) {
       var tr = document.createElement("tr");
-      var td = el("td");
+
+      var td = cell("c-stock", "", undefined);
       var a = el("a", "sym", r.symbol);
       a.href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(r.tv || ("NSE:" + r.symbol));
       a.target = "_blank"; a.rel = "noopener noreferrer";
       td.appendChild(a);
-      if (r.exch === "BSE") td.appendChild(el("span", "tag", "BSE"));
+      if (r.exch === "BSE") td.appendChild(el("span", "tag exch", "BSE"));
       tr.appendChild(td);
-      tr.appendChild(el("td", "", r.close.toFixed(2)));
-      tr.appendChild(el("td", r.chg1d >= 0 ? "up" : "down", pct(r.chg1d)));
-      tr.appendChild(el("td", r.chg5d >= 0 ? "up" : "down", pct(r.chg5d)));
-      var sc = el("td"), w = el("span", "score"), bar = el("span", "bar"), fill = document.createElement("i");
+
+      tr.appendChild(cell("c-price", "Price", num(r.close, 2)));
+      tr.appendChild(cell("c-d1", "1D", pct(r.chg1d), r.chg1d >= 0 ? "up" : "down"));
+      tr.appendChild(cell("c-d5", "5D", pct(r.chg5d), r.chg5d >= 0 ? "up" : "down"));
+
+      var sc = cell("c-score", "", undefined);
+      var w = el("span", "score"), bar = el("span", "bar"), fill = document.createElement("i");
       fill.style.width = r.score + "%"; bar.appendChild(fill);
-      w.appendChild(el("b", "", String(r.score))); w.appendChild(bar); sc.appendChild(w); tr.appendChild(sc);
-      var st = el("td", "l");
-      r.setups.forEach(function (s) { st.appendChild(el("span", "tag", labels[s] || s)); });
+      w.appendChild(el("b", "", String(r.score))); w.appendChild(bar); sc.appendChild(w);
+      tr.appendChild(sc);
+
+      var st = cell("c-setups", "", undefined);
+      r.setups.forEach(function (s) {
+        var t = el("span", "tag", SHORT[s] || labels[s] || s);
+        t.title = labels[s] || s;
+        st.appendChild(t);
+      });
       tr.appendChild(st);
-      tr.appendChild(el("td", "", r.to_breakout.toFixed(1) + "%"));
-      tr.appendChild(el("td", "", r.level.toFixed(2)));
-      tr.appendChild(el("td", "", r.stop.toFixed(2)));
-      tr.appendChild(el("td", "", r.vol_ratio.toFixed(2)));
-      tr.appendChild(el("td", "", String(r.bb_pctile)));
-      var sp = el("td"); sp.appendChild(spark(r.spark, r.spark[r.spark.length - 1] >= r.spark[0])); tr.appendChild(sp);
+
+      tr.appendChild(cell("c-brk", "Breakout tak", num(r.to_breakout, 1) + "%"));
+      tr.appendChild(cell("c-level", "Level", num(r.level, 2)));
+      tr.appendChild(cell("c-stop", "Stop", num(r.stop, 2)));
+      tr.appendChild(cell("c-vol", "Vol ratio", num(r.vol_ratio, 2)));
+      tr.appendChild(cell("c-bb", "BB %ile", num(r.bb_pctile, 0)));
+
+      var sp = cell("c-spark", "60 din", undefined);
+      var sk = r.spark || [];
+      sp.appendChild(spark(sk, sk.length ? sk[sk.length - 1] >= sk[0] : true));
+      tr.appendChild(sp);
+
       body.appendChild(tr);
     });
+
+    var more = $("more");
+    if (list.length > shown.length) {
+      more.hidden = false;
+      more.textContent = "Aur dikhao (" + (list.length - shown.length) + " baaki)";
+    } else {
+      more.hidden = true;
+    }
   }
   render();
 
