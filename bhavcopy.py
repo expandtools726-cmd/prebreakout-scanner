@@ -119,7 +119,7 @@ def _fmt(url: str, d: date) -> str:
     )
 
 
-def _fetch(session, exch: str, d: date, retries: int = 3) -> tuple[str, bytes | None]:
+def _fetch(session, exch: str, d: date, retries: int = 5) -> tuple[str, bytes | None]:
     """('ok', bytes) | ('missing', None) | ('error', None)"""
     urls = NSE_URLS if exch == "NSE" else BSE_URLS
     saw_error = False
@@ -220,10 +220,15 @@ def adjust_corporate_actions(g: pd.DataFrame) -> pd.DataFrame:
 # Universe builder
 # --------------------------------------------------------------------------
 def _to_universe(df: pd.DataFrame, key_col: str, min_rows: int, recent_days: int = 3, cov_days: int = 60,
-                 cov_min: float = 0.85) -> dict[str, pd.DataFrame]:
+                 cov_min: float = 0.85, calendar=None) -> dict[str, pd.DataFrame]:
     if df.empty:
         return {}
-    mdays = {d: i for i, d in enumerate(sorted(df["date"].unique()))}
+    # calendar = poore exchange ke trading din (NSE ke). Isse BSE ke gayab din "gap" ginte hain,
+    # aur gap wale din par galti se split-adjust nahi hota.
+    all_dates = set(df["date"].unique())
+    if calendar is not None:
+        all_dates |= set(calendar)
+    mdays = {d: i for i, d in enumerate(sorted(all_dates))}
     df = df.assign(mday=df["date"].map(mdays)).sort_values([key_col, "date"])
     last_m = max(mdays.values())
     out = {}
@@ -254,12 +259,13 @@ def build_universe(days_back: int = 380, include_bse: bool = False, workers: int
 
     if include_bse:
         print("BSE bhavcopy load ho rahi hai...")
-        bse = load_exchange("BSE", days_back, workers)
+        bse = load_exchange("BSE", days_back, min(workers, 2))   # BSE zyada rate-limit karta hai
         if not bse.empty:
             bse = bse[~bse["isin"].isin(nse_isins) | (bse["isin"] == "")]   # NSE par jo hain unhe dobara nahi
             n0 = len(universe)
             last_sym = bse.sort_values("date").groupby("code")["symbol"].last()
-            for code, df in _to_universe(bse, "code", min_rows).items():
+            calendar = nse["date"].unique() if not nse.empty else None
+            for code, df in _to_universe(bse, "code", min_rows, calendar=calendar).items():
                 sym = last_sym[code]
                 if sym in universe:
                     sym = f"{sym}.BO"
