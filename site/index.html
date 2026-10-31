@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pre-Breakout Scanner</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #14181f; --muted: #5d6675; --line: #e3e6ec;
+    --accent: #0b6b57; --accent-soft: #dff3ed; --up: #0a7d4f; --down: #c0392b; --warn-bg: #fff4d6; --warn-ink: #6b4e00;
+    --chip-bg: #eef1f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218; --card: #171b23; --ink: #e8ebf1; --muted: #9aa3b2; --line: #272d38;
+      --accent: #3ccaa6; --accent-soft: #13332c; --up: #3ccf8e; --down: #ff7b6b; --warn-bg: #3a3112; --warn-ink: #f0d98a;
+      --chip-bg: #232a36;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .banner { background: var(--warn-bg); color: var(--warn-ink); padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13.5px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 12.5px; }
+  .filters { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: grid; gap: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  input[type=search] { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 240px; font: inherit; }
+  label.rng { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  label.rng output { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 28px; }
+  input[type=range] { accent-color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .tablewrap { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th.l, td.l { text-align: left; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--card); }
+  th.sorted { color: var(--accent); }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 40%, transparent); }
+  a.sym { color: var(--ink); font-weight: 700; text-decoration: none; border-bottom: 1px dashed var(--muted); }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .score { display: inline-flex; align-items: center; gap: 8px; }
+  .bar { width: 54px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .tag { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); margin-right: 4px; }
+  svg.spark { width: 90px; height: 28px; display: block; margin-left: auto; }
+  .empty { padding: 30px; text-align: center; color: var(--muted); }
+  details { margin-top: 18px; color: var(--muted); font-size: 13.5px; }
+  details summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+  details li { margin: 4px 0; }
+  .foot { margin-top: 22px; font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pre-Breakout Scanner</h1>
+  <div class="sub" id="meta">Loading...</div>
+  <div class="row" style="margin-bottom:14px" id="refreshRow" hidden>
+    <button type="button" class="chip" id="refreshBtn">Data refresh karo</button>
+    <label class="rng"><input type="checkbox" id="onlyNse"> sirf NSE</label>
+    <span class="sub" id="refreshMsg" role="status" style="margin:0"></span>
+  </div>
+  <div id="demo" class="banner" hidden>Ye <b>demo (nakli) data</b> hai, sirf dashboard dekhne ke liye. Asli data ke liye <code>python scanner.py</code> chalao.</div>
+
+  <div class="stats">
+    <div class="stat"><b id="s-scanned">-</b><span>Stocks scan hue</span></div>
+    <div class="stat"><b id="s-matched">-</b><span>Pre-breakout mile</span></div>
+    <div class="stat"><b id="s-shown">-</b><span>Filter ke baad</span></div>
+    <div class="stat"><b id="s-top">-</b><span>Top score</span></div>
+  </div>
+
+  <div class="filters">
+    <div class="row">
+      <input type="search" id="q" placeholder="Symbol dhundo (jaise DHANUKA)" aria-label="Symbol search">
+      <label class="rng">Min score <input type="range" id="minScore" min="0" max="100" step="5" value="40"><output id="minScoreO">40</output></label>
+      <label class="rng">Breakout se max door <input type="range" id="maxDist" min="1" max="10" step="0.5" value="10"><output id="maxDistO">10</output>%</label>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Setup filter"></div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr id="head"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden>Is filter par koi stock nahi mila. Min score kam karke dekho.</div>
+  </div>
+
+  <details>
+    <summary>Columns ka matlab aur setups</summary>
+    <ul>
+      <li><b>Score</b>: setups ke weight + breakout level ke kitna paas hai. 100 mein se.</li>
+      <li><b>Level</b>: pichhle 20 din ka high. Isse upar close = breakout trigger.</li>
+      <li><b>Stop</b>: pichhle 20 din ka low (base ka neeche). Sirf reference hai.</li>
+      <li><b>Vol ratio</b>: 5-din avg volume / 50-din avg. 0.85 se kam = volume sookh raha hai (dry-up).</li>
+      <li><b>BB pctile</b>: Bollinger width pichhle 120 din mein kitne percentile par. 10 se kam = squeeze.</li>
+      <li><b>Consolidation + Volume dry-up</b>: 20 din ki range 12% se kam aur volume dry-up.</li>
+      <li><b>52W High ke paas</b>: high se 5% ke andar aur 50-DMA ke upar (uptrend).</li>
+      <li><b>Bollinger squeeze</b>: volatility sabse kam 10% mein.</li>
+      <li><b>Beaten-down base</b>: 52W high se 25%+ gira, low se 20% ke andar, ab tight base (Dhanuka jaisa).</li>
+    </ul>
+  </details>
+
+  <p class="foot">Sirf educational screening hai, trade ki salah nahi. Pre-breakout ka matlab ye nahi ki breakout aayega. Stop-loss aur risk apna khud tay karo. Data: Yahoo Finance (daily, end-of-day).</p>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  var D = window.SCAN_DATA;
+  var $ = function (id) { return document.getElementById(id); };
+  if (!D) { $("meta").textContent = "data.js nahi mili. Pehle scanner.py chalao."; return; }
+
+  var rows = D.rows || [];
+  var labels = D.labels || {};
+  var active = {};           // setup -> true
+  var sortKey = "score", sortDir = -1;
+
+  $("meta").textContent = "Update: " + D.generated_at + " | Data tak: " + (D.data_asof || "-") + (D.source ? " | Source: " + D.source : "");
+  $("demo").hidden = !D.demo;
+  $("s-scanned").textContent = D.scanned;
+  $("s-matched").textContent = D.matched;
+  $("s-top").textContent = rows.length ? rows[0].score : "-";
+
+  var cols = [
+    ["symbol", "Stock", "l"], ["close", "Price"], ["chg1d", "1D %"], ["chg5d", "5D %"],
+    ["score", "Score"], ["setups", "Setups", "l", true], ["to_breakout", "Breakout tak %"],
+    ["level", "Level"], ["stop", "Stop"], ["vol_ratio", "Vol ratio"], ["bb_pctile", "BB pctile"], ["spark", "60D", "", true]
+  ];
+  var head = $("head");
+  cols.forEach(function (c) {
+    var th = document.createElement("th");
+    th.textContent = c[1];
+    if (c[2] === "l") th.className = "l";
+    if (!c[3]) {
+      th.addEventListener("click", function () {
+        if (sortKey === c[0]) sortDir = -sortDir; else { sortKey = c[0]; sortDir = (c[0] === "symbol" || c[0] === "to_breakout") ? 1 : -1; }
+        render();
+      });
+      th.dataset.key = c[0];
+    }
+    head.appendChild(th);
+  });
+
+  var chips = $("chips");
+  Object.keys(labels).forEach(function (k) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", "false"); b.textContent = labels[k];
+    b.addEventListener("click", function () {
+      active[k] = !active[k];
+      b.setAttribute("aria-pressed", active[k] ? "true" : "false");
+      render();
+    });
+    chips.appendChild(b);
+  });
+
+  ["q", "minScore", "maxDist"].forEach(function (id) { $(id).addEventListener("input", render); });
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function pct(v) { return (v > 0 ? "+" : "") + v.toFixed(2) + "%"; }
+
+  function spark(arr, up) {
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("class", "spark"); svg.setAttribute("viewBox", "0 0 90 28");
+    var mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), rg = (mx - mn) || 1;
+    var pts = arr.map(function (v, i) {
+      return (i / (arr.length - 1) * 90).toFixed(1) + "," + (26 - (v - mn) / rg * 24).toFixed(1);
+    }).join(" ");
+    var pl = document.createElementNS(ns, "polyline");
+    pl.setAttribute("points", pts); pl.setAttribute("fill", "none");
+    pl.setAttribute("stroke", up ? "var(--up)" : "var(--down)"); pl.setAttribute("stroke-width", "1.5");
+    svg.appendChild(pl);
+    return svg;
+  }
+
+  function render() {
+    var q = $("q").value.trim().toUpperCase();
+    var minScore = +$("minScore").value, maxDist = +$("maxDist").value;
+    $("minScoreO").textContent = minScore; $("maxDistO").textContent = maxDist;
+    var need = Object.keys(active).filter(function (k) { return active[k]; });
+
+    var list = rows.filter(function (r) {
+      if (q && r.symbol.indexOf(q) === -1) return false;
+      if (r.score < minScore || r.to_breakout > maxDist) return false;
+      return need.every(function (k) { return r.setups.indexOf(k) !== -1; });
+    });
+    list.sort(function (a, b) {
+      var x = a[sortKey], y = b[sortKey];
+      if (typeof x === "string") return x.localeCompare(y) * sortDir;
+      return ((x > y) - (x < y)) * sortDir;
+    });
+
+    Array.prototype.forEach.call(head.children, function (th) {
+      th.classList.toggle("sorted", th.dataset.key === sortKey);
+    });
+
+    $("s-shown").textContent = list.length;
+    $("empty").hidden = list.length > 0;
+    var body = $("body"); body.textContent = "";
+    list.forEach(function (r) {
+      var tr = document.createElement("tr");
+      var td = el("td");
+      var a = el("a", "sym", r.symbol);
+      a.href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(r.tv || ("NSE:" + r.symbol));
+      a.target = "_blank"; a.rel = "noopener noreferrer";
+      td.appendChild(a);
+      if (r.exch === "BSE") td.appendChild(el("span", "tag", "BSE"));
+      tr.appendChild(td);
+      tr.appendChild(el("td", "", r.close.toFixed(2)));
+      tr.appendChild(el("td", r.chg1d >= 0 ? "up" : "down", pct(r.chg1d)));
+      tr.appendChild(el("td", r.chg5d >= 0 ? "up" : "down", pct(r.chg5d)));
+      var sc = el("td"), w = el("span", "score"), bar = el("span", "bar"), fill = document.createElement("i");
+      fill.style.width = r.score + "%"; bar.appendChild(fill);
+      w.appendChild(el("b", "", String(r.score))); w.appendChild(bar); sc.appendChild(w); tr.appendChild(sc);
+      var st = el("td", "l");
+      r.setups.forEach(function (s) { st.appendChild(el("span", "tag", labels[s] || s)); });
+      tr.appendChild(st);
+      tr.appendChild(el("td", "", r.to_breakout.toFixed(1) + "%"));
+      tr.appendChild(el("td", "", r.level.toFixed(2)));
+      tr.appendChild(el("td", "", r.stop.toFixed(2)));
+      tr.appendChild(el("td", "", r.vol_ratio.toFixed(2)));
+      tr.appendChild(el("td", "", String(r.bb_pctile)));
+      var sp = el("td"); sp.appendChild(spark(r.spark, r.spark[r.spark.length - 1] >= r.spark[0])); tr.appendChild(sp);
+      body.appendChild(tr);
+    });
+  }
+  render();
+
+  // Refresh button: sirf live site (http/https) par dikhta hai, file:// par nahi
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    $("refreshRow").hidden = false;
+    $("refreshBtn").addEventListener("click", function () {
+      var pw = window.prompt("Refresh password:");
+      if (!pw) return;
+      var btn = $("refreshBtn"), msg = $("refreshMsg");
+      btn.disabled = true; msg.textContent = "Bhej raha hoon...";
+      fetch("refresh.php", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw, universe: $("onlyNse").checked ? "nse" : "nse+bse" })
+      }).then(function (r) { return r.json().catch(function () { return { ok: false, error: "Server se galat jawab aaya (refresh.php setup check karo)" }; }); })
+        .then(function (j) {
+          msg.textContent = j.ok ? "Scan shuru ho gaya. 10-25 minute baad page reload karo (Ctrl+F5)." : (j.error || "Fail hua");
+        })
+        .catch(function () { msg.textContent = "Server tak pahunch nahi paya"; })
+        .then(function () { setTimeout(function () { btn.disabled = false; }, 5000); });
+    });
+  }
+})();
+</script>
+</body>
+</html>
