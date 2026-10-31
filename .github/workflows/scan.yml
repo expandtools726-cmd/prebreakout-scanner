@@ -69,5 +69,4 @@ jobs:
           local-dir: ./site/
           server-dir: ${{ secrets.FTP_DIR || '/public_html/' }}
           exclude: |
-            **/refresh_config.sample.phpname: Pre-breakout scan
-
+            **/refresh_config.sample.php
