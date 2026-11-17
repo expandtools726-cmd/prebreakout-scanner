@@ -57,7 +57,7 @@ class Config:
 WEIGHTS = {"TIGHT": 30, "NEAR_HIGH": 25, "SQUEEZE": 25, "BASE": 20}
 LABELS = {
     "TIGHT": "Consolidation + Volume dry-up",
-    "NEAR_HIGH": "52W High ke paas",
+    "NEAR_HIGH": "Near 52W High",
     "SQUEEZE": "Bollinger squeeze",
     "BASE": "Beaten-down base",
 }
